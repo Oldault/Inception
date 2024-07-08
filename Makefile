@@ -6,7 +6,7 @@ all: help
 # Check if .env file exists
 check-env:
 	@if [ ! -f $(ENV_FILE) ]; then \
-		echo "Error: .env file not found in ./srcs directory."; \
+		echo "$(RED)$(REVERSED) Error: .env file not found in ./srcs directory. $(RESET)"; \
 		exit 1; \
 	fi
 
