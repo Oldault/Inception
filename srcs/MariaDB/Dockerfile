@@ -1,16 +1,12 @@
-FROM alpine:3.19
+FROM debian:bullseye
 
-RUN apk update && \
-    apk add --no-cache mariadb mariadb-client
+RUN apt-get update
+RUN apt install -y mariadb-server
+RUN mkdir -p /run/mysqld && chown -R mysql:mysql /run/mysqld
 
-RUN mkdir -p /run/mysqld && chown -R mysql:mysql /run/mysqld && \
-    mkdir -p /var/lib/mysql && chown -R mysql:mysql /var/lib/mysql && \
-    mkdir -p /var/log/mysql && chown -R mysql:mysql /var/log/mysql
+COPY ./conf/50-server.cnf etc/mysql/mariadb.conf.d/
 
-COPY ./conf/my.cnf /etc/mysql/my.cnf
+COPY mariadb-setup.sh /
+RUN chmod +x /mariadb-setup.sh
 
-EXPOSE 3306
-
-RUN mysql_install_db --user=mysql --ldata=/var/lib/mysql
-
-CMD ["mysqld", "--user=mysql"]
+ENTRYPOINT [ "/mariadb-setup.sh" ]

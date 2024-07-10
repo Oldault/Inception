@@ -11,32 +11,33 @@ services:
       - custom-network
     restart: always
 
-  wordpress:
-    build:
-      context: ./WordPress
-      dockerfile: Dockerfile
-    volumes:
-      - ~/data/html:/var/www/html
-    env_file:
-      - .env
-    networks:
-      - custom-network
-    restart: always
+  # wordpress:
+  #   build:
+  #     context: ./WordPress
+  #     dockerfile: Dockerfile
+  #   volumes:
+  #     - ~/data/html:/var/www/html
+  #   env_file:
+  #     - .env
+  #   networks:
+  #     - custom-network
+  #   restart: always
   
-  nginx:
-    build:
-      context: ./nginx
-      dockerfile: Dockerfile
-    volumes:
-      - ./nginx:/etc/nginx/conf.d
-      - ~/data/html:/var/www/html
-    ports:
-      - "443:443"
-    depends_on:
-      - wordpress
-    networks:
-      - custom-network
-    restart: always
+  # nginx:
+  #   build:
+  #     context: ./nginx
+  #     dockerfile: Dockerfile
+  #   volumes:
+  #     - ./nginx:/etc/nginx/conf.d
+  #     - ~/data/html:/var/www/html
+  #   ports:
+  #     - "443:443"
+  #     - "80:80"
+  #   depends_on:
+  #     - wordpress
+  #   networks:
+  #     - custom-network
+  #   restart: always
 
 networks:
   custom-network:

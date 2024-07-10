@@ -3,7 +3,7 @@ FROM alpine:3.19
 RUN apk update && \
     apk add --no-cache nginx openssl tini
     
-EXPOSE 80 443
+EXPOSE 443
 
 RUN mkdir -p /etc/nginx && \
     mkdir -p /var/www && \
