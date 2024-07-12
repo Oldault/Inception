@@ -1,44 +1,37 @@
 services:
-  mariadb:
-    build:
-      context: ./MariaDB
-      dockerfile: Dockerfile
-    volumes:
-      - ~/data/mysql:/var/lib/mysql
-    env_file:
-      - .env
+  adminer:
+    container_name: Adminer
+    build: Adminer/.
+    ports:
+      - "80:80"
     networks:
-      - custom-network
-    restart: always
+      - inception_net
+    restart: on-failure
 
-  # wordpress:
-  #   build:
-  #     context: ./WordPress
-  #     dockerfile: Dockerfile
-  #   volumes:
-  #     - ~/data/html:/var/www/html
-  #   env_file:
-  #     - .env
-  #   networks:
-  #     - custom-network
-  #   restart: always
-  
-  # nginx:
-  #   build:
-  #     context: ./nginx
-  #     dockerfile: Dockerfile
-  #   volumes:
-  #     - ./nginx:/etc/nginx/conf.d
-  #     - ~/data/html:/var/www/html
-  #   ports:
-  #     - "443:443"
-  #     - "80:80"
-  #   depends_on:
-  #     - wordpress
-  #   networks:
-  #     - custom-network
-  #   restart: always
+  mariadb:
+    container_name: MariaDB
+    build: MariaDB/.
+    networks:
+      - inception_net
+    volumes:
+      - mdb:/var/lib/mysql
+    env_file: .env
+    restart: on-failure
 
 networks:
-  custom-network:
+  inception_net:
     driver: bridge
+
+volumes:
+  mdb:
+    driver: local
+    driver_opts:
+      type: 'none'
+      o: bind
+      device: /tmp
+  wp:
+    driver: local
+    driver_opts:
+      type: 'none'
+      o: bind
+      device: /tmp
