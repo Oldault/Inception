@@ -1,4 +1,47 @@
 services:
+
+  mariadb:
+    container_name: MariaDB
+    build: MariaDB/.
+    ports:
+      - "3306:3306"
+    command: '--socket=/run/mysqld/mysqld.sock --datadir=/var/lib/mysql'
+    networks:
+      - inception_net
+    volumes:
+      - mdb:/var/lib/mysql
+    env_file: .env
+    restart: on-failure
+
+  wordpress:
+    container_name: WordPress
+    build: WordPress/.
+    ports:
+      - "9000:9000"
+    networks:
+      - inception_net
+    volumes:
+      - wp:/var/www/html
+    restart: on-failure
+    depends_on:
+      - mariadb
+    env_file: .env
+
+  nginx:
+    container_name: NGINX
+    build: NGINX/.
+    ports:
+      - "443:443"
+    networks:
+      - inception_net
+    depends_on:
+      - wordpress
+      - mariadb
+    volumes:
+      - wp:/var/www/html
+    restart: on-failure
+    
+  
   adminer:
     container_name: Adminer
     build: Adminer/.
@@ -6,16 +49,8 @@ services:
       - "80:80"
     networks:
       - inception_net
-    restart: on-failure
-
-  mariadb:
-    container_name: MariaDB
-    build: MariaDB/.
-    networks:
-      - inception_net
-    volumes:
-      - mdb:/var/lib/mysql
-    env_file: .env
+    depends_on:
+      - mariadb
     restart: on-failure
 
 networks:

@@ -1,20 +1,18 @@
-FROM alpine:3.19
+FROM debian:bullseye
 
-RUN apk update && \
-    apk add --no-cache nginx openssl tini
-    
-EXPOSE 443
+RUN apt update && \
+    apt upgrade -y && \
+    apt install -y nginx openssl
 
-RUN mkdir -p /etc/nginx && \
-    mkdir -p /var/www && \
-    mkdir -p /etc/ssl/certs && \
-    mkdir -p /etc/ssl/private
-    
-COPY ./conf/nginx.conf /etc/nginx/nginx.conf
-COPY ./tools/start.sh /var/www/start.sh
+RUN openssl req -x509 -nodes -days 365 -newkey rsa:2048 \
+    -keyout /etc/ssl/private/svolodin.key \
+    -out /etc/ssl/certs/svolodin.crt \
+    -subj "/C=FR/ST=Paris/L=Paris/O=42/CN=svolodin.42.fr"
 
-RUN chmod +x /var/www/start.sh
+RUN openssl dhparam -out /etc/nginx/dhparam.pem 2048
+COPY ./conf/self-signed.conf /etc/nginx/snippets/
 
-ENTRYPOINT ["/sbin/tini", "--"]
+COPY ./conf/default /etc/nginx/sites-available/
+COPY ./conf/adminer.conf /etc/nginx/sites-available/
 
-CMD ["sh", "/var/www/start.sh"]
+ENTRYPOINT ["nginx", "-g", "daemon off;"]

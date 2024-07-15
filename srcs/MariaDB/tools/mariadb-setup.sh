@@ -1,15 +1,21 @@
 #!/bin/sh
 
-service mysql start
+mysqld_safe &
+
+until mysqladmin ping >/dev/null 2>&1; do
+    echo "Waiting for database connection..."
+    sleep 20
+done
 
 # mysql root exec
-SQL_CMD="mysql -u${MYSQL_ROOT_USER} -p${MYSQL_ROOT_PASSWORD} -e"
+SQL_CMD="mysql -u root -p${MYSQL_ROOT_PASSWORD} -e"
 
-$SQL_CMD "CREATE DATABASE IF NOT EXISTS ${MYSQL_DATABASE};"
-$SQL_CMD "CREATE USER '${MYSQL_USER}'@'%' IDENTIFIED BY '${MYSQL_PASSWORD}';"
-$SQL_CMD "GRANT ALL PRIVILEGES ON ${MYSQL_DATABASE}.* TO '${MYSQL_USER}'@'%';"
-$SQL_CMD "ALTER USER '${MYSQL_ROOT_USER}'@'localhost' IDENTIFIED BY '${MYSQL_ROOT_PASSWORD}';"
+$SQL_CMD "CREATE DATABASE IF NOT EXISTS \`${MYSQL_DATABASE}\`;"
+$SQL_CMD "CREATE USER IF NOT EXISTS \`${MYSQL_USER}\`@'%' IDENTIFIED BY '${MYSQL_PASSWORD}';"
+$SQL_CMD "GRANT ALL PRIVILEGES ON \`${MYSQL_DATABASE}\`.* TO \`${MYSQL_USER}\`@'%';"
+$SQL_CMD "ALTER USER 'root'@'localhost' IDENTIFIED BY '${MYSQL_ROOT_PASSWORD}';"
 $SQL_CMD "FLUSH PRIVILEGES;"
-mysqladmin -u${MYSQL_ROOT_USER} -p${MYSQL_ROOT_PASSWORD} shutdown
 
-exec "$@"
+mysqladmin -u root -p${MYSQL_ROOT_PASSWORD} shutdown
+
+exec mysqld_safe

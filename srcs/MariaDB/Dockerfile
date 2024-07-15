@@ -1,15 +1,16 @@
-FROM debian:buster
+FROM debian:bullseye
 
-RUN apt update
-RUN apt install -y mariadb-server procps
+RUN apt-get update && apt-get upgrade -y && \
+    apt install -y mariadb-server
 
-EXPOSE 3306
+RUN mkdir -p /run/mysqld /var/lib/mysql /var/log/mariadb && \
+    chown -R mysql:mysql /run/mysqld /var/lib/mysql /var/log/mariadb
 
-COPY ./tools/mariadb-setup.sh /tmp/mariadb-setup.sh
-RUN chmod +x /tmp/mariadb-setup.sh
+RUN mysql_install_db --user=mysql --datadir=/var/lib/mysql
 
-COPY ./conf/50-server.cnf etc/mysql/mariadb.conf.d/50-server.cnf
+COPY ./conf/50-server.cnf /etc/mysql/mariadb.conf.d/50-server.cnf
+COPY ./tools/mariadb-setup.sh /mariadb-setup.sh
 
-ENTRYPOINT [ "sh", "/tmp/mariadb-setup.sh" ]
+RUN chmod +x /mariadb-setup.sh
 
-CMD ["mysqld_safe"]
+ENTRYPOINT ["sh", "/mariadb-setup.sh"]
